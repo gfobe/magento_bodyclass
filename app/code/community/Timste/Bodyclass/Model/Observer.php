@@ -147,6 +147,22 @@ class Timste_Bodyclass_Model_Observer
             }
         }
 
+        try{
+            #Mage::log( $block->getBodyClass() ,null,'bodyclass.log');
+        }
+        catch(Exception $e){
+
+        }
+
+        // HANDLES
+        try{
+            #Mage::log('#################################################',null,'bodyclass.log');
+            #Mage::log(Mage::app()->getLayout()->getUpdate()->getHandles(),null,'bodyclass.log');
+        }
+        catch(Exception $e){
+
+        }
+
         return $this;
     }
 
@@ -228,7 +244,31 @@ class Timste_Bodyclass_Model_Observer
         $return['mobile']   = $mobile;
 
         $cache[$ua] = $return;
-        Mage::app()->saveCache($cache, self::CACHE_KEY, array(self::CACHE_GROUP));
+
+        // check grid && list mode for registry
+        $actionName = Mage::app()->getRequest()->getActionName();
+        $controllerName = Mage::app()->getRequest()->getControllerName();
+        $listMode = Mage::getSingleton('core/app')->getRequest()->get('mode');
+        Mage::unregister('list_mode');
+        if ($actionName == 'view') {
+            if ($controllerName == 'category') {
+                if ($listMode == 'list') {
+                    Mage::register('list_mode', $listMode);
+                } else {
+                    Mage::register('list_mode', 'grid');
+                }
+            }
+        }
+
+        #Mage::log($actionName,null,'bodyclass.log');
+        #Mage::log($controllerName,null,'bodyclass.log');
+
+        Mage::unregister('product_view');
+        if($actionName == 'view'){
+            if($controllerName == 'product'){
+                Mage::register('product_view','1');
+            }
+        }
 
         return $return;
     }
